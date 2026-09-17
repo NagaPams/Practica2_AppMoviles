@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     # Construir usando el Dockerfile del directorio actual (.)
