@@ -68,7 +68,7 @@ Para levantar el entorno completo se requiere tener `docker` y el plugin de `doc
 
 ### Capturas del Funcionamiento
 
-#### Levantamiento del entorno Docker (Consola)
+#### Levantamiento del entorno Docker (Terminal)
 ![Docker Up](capturas/1_docker_up.png)
 
 #### Manejo de Errores (Login Inválido)
@@ -92,9 +92,9 @@ Para levantar el entorno completo se requiere tener `docker` y el plugin de `doc
 ---
 
 ## Conclusiones
-Durante el desarrollo de esta práctica logré integrar con éxito una aplicación móvil nativa con un backend contenedorizado. Uno de los mayores retos fue el enrutamiento de la red desde el emulador de Android (que virtualiza su propio adaptador) hacia el contenedor de Docker en un entorno Linux (Arch Linux). El clásico `10.0.2.2` no conseguía traspasar el ruteo interno de Docker asociado al `localhost` del host. 
+Durante el desarrollo de esta práctica logré integrar con éxito una aplicación móvil nativa con un backend contenedorizado. Uno de los mayores retos fue el enrutamiento de la red desde el emulador de Android (que virtualiza su propio adaptador) hacia el contenedor de Docker en un entorno Linux (Arch Linux). La direccion `10.0.2.2` no conseguía traspasar el ruteo interno de Docker asociado al `localhost` del host. 
 
-La dificultad fue resuelta al asignar directamente la dirección IP física de la computadora en la red LAN (192.168.x.x) dentro del cliente `Retrofit`, lo que permitió una comunicación fluida. Por otro lado, la adopción de Jetpack Compose facilitó notablemente la construcción y el manejo de estados de la UI (errores de validación, actualizaciones en tiempo real tras la respuesta del CRUD), confirmando sus ventajas frente al paradigma anterior de XML.
+La dificultad fue resuelta al asignar directamente la dirección IP física de la computadora en la red LAN dentro del cliente `Retrofit`, lo que permitió una comunicación fluida. Por otro lado, la adopción de Jetpack Compose facilitó notablemente la construcción y el manejo de estados de la UI (errores de validación, actualizaciones en tiempo real tras la respuesta del CRUD), confirmando sus ventajas frente al paradigma anterior de XML.
 
 ## Bibliografía
 *   Android Developers. (2026). *Jetpack Compose Tutorial*. Recuperado de https://developer.android.com/jetpack/compose/tutorial
