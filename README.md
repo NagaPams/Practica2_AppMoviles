@@ -59,7 +59,13 @@ Para levantar el entorno completo se requiere tener `docker` y el plugin de `doc
    sudo docker compose up --build
    ```
 4. El backend estará escuchando peticiones en `http://localhost:5000`.
-5. Abrir la carpeta `LibreriaApp` en Android Studio y ejecutar el emulador.
+5. Abrir la carpeta `LibreriaApp` en Android Studio.
+6. **Configuración de Red (¡Importante!):** Para que la app se conecte correctamente al backend desde cualquier dispositivo o red, abre el archivo `local.properties` (ubicado en la raíz del proyecto Android) y agrega tu dirección IP local:
+   ```properties
+   BACKEND_BASE_URL=http://T.U.I.P:5000/
+   ```
+   *(Sustituye `T.U.I.P` por tu IP real, ej: `192.168.1.75`. Esto se inyecta dinámicamente al cliente Retrofit usando `BuildConfig`, evitando subir IPs quemadas al repositorio).*
+7. Sincronizar Gradle y ejecutar el emulador o tu dispositivo físico.
 
 ### Capturas del Funcionamiento
 

@@ -1,7 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
 }
+
+// Cargar local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+val backendUrl = localProperties.getProperty("BACKEND_BASE_URL", "http://10.0.2.2:5000/")
 
 android {
     namespace = "com.pamsn.libreriaapp"
@@ -17,6 +27,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        // Inyectamos la URL en BuildConfig
+        buildConfigField("String", "BACKEND_BASE_URL", "\"$backendUrl\"")
     }
 
     buildTypes {
@@ -32,6 +45,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
