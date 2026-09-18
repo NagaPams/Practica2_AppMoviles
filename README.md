@@ -62,25 +62,41 @@ Todos los endpoints de este recurso requieren sesión iniciada. Se debe enviar e
 
 ### Instrucciones de Instalación y Ejecución
 
-Para levantar el entorno completo se requiere tener `docker` y el plugin de `docker-compose` instalados:
+Para levantar el entorno completo se requiere tener `docker` (con el plugin `docker-compose`) y Android Studio instalados. Los pasos son los mismos en Windows y en Linux/macOS; se aclara la diferencia únicamente donde el comando cambia según el sistema operativo.
+
 1. Clonar este repositorio.
 2. Navegar en terminal hacia la carpeta del backend: `cd backend/Docker-Flask/ORM`
 3. Copiar `.env.example` a `.env` y definir un valor para `SECRET_KEY` (usada para firmar los tokens de sesión):
-   ```bash
-   cp .env.example .env
-   # editar .env y poner SECRET_KEY=<algo aleatorio y secreto>
-   ```
+   - **Windows (PowerShell):**
+     ```powershell
+     copy .env.example .env
+     ```
+   - **Linux / macOS:**
+     ```bash
+     cp .env.example .env
+     ```
+   - Luego, en cualquier sistema, editar el `.env` recién creado y poner `SECRET_KEY=<algo aleatorio y secreto>`.
 4. Ejecutar el comando para levantar el servidor y la base de datos:
-   ```bash
-   sudo docker compose up --build
-   ```
-5. El backend estará escuchando peticiones en `http://localhost:5000`.
-6. Abrir la carpeta `LibreriaApp` en Android Studio.
-7. **Configuración de Red:** Para que la app se conecte correctamente al backend desde cualquier dispositivo o red, abre el archivo `local.properties` (ubicado en la raíz del proyecto Android) y agrega tu dirección IP local:
+   - **Windows:** con Docker Desktop instalado y corriendo, abrir PowerShell en la carpeta del backend y ejecutar:
+     ```powershell
+     docker compose up --build
+     ```
+   - **Linux / macOS:** (se antepone `sudo` si tu usuario no pertenece al grupo `docker`):
+     ```bash
+     sudo docker compose up --build
+     ```
+5. El backend estará escuchando peticiones en `http://localhost:5000` en ambos sistemas.
+6. Abrir la carpeta `LibreriaApp` en Android Studio (funciona igual en Windows y en Linux/macOS).
+7. **Configuración de Red:** para que la app se conecte correctamente al backend, abre el archivo `local.properties` (ubicado en la raíz del proyecto Android) y agrega la dirección IP local de la máquina donde corre el backend:
    ```properties
    BACKEND_BASE_URL=http://T.U.I.P:5000/
    ```
-8. Sincronizar Gradle y ejecutar el emulador o tu dispositivo físico.
+   Para averiguar esa IP local:
+   - **Windows:** abrir `cmd` o PowerShell y ejecutar `ipconfig`; usar la "Dirección IPv4" del adaptador de red activo (Wi-Fi o Ethernet).
+   - **Linux:** ejecutar `hostname -I` o `ip addr show` y usar la IP de la interfaz activa (por ejemplo `wlp2s0` o `eth0`).
+   - **macOS:** ejecutar `ipconfig getifaddr en0` (Wi-Fi) o revisar Preferencias del Sistema → Red.
+   - Si se usa el **emulador de Android** en la misma máquina donde corre el backend, también puede usarse `10.0.2.2` en lugar de la IP local (ver nota en `backend/README.md`).
+8. Sincronizar Gradle y ejecutar el emulador o tu dispositivo físico desde Android Studio (mismo procedimiento en Windows y en Linux/macOS).
 
 ### Capturas del Funcionamiento
 
