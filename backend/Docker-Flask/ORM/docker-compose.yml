@@ -7,7 +7,12 @@ services:
     # Mapeo de puertos: Puerto PC : Puerto Contenedor
     ports:
       - "5000:5000"
-    
+
+    # Variables de entorno: la llave para firmar los tokens de sesión (JWT)
+    # se toma del archivo .env (ver .env.example), nunca del código.
+    env_file:
+      - .env
+
     # Volúmenes: Sincroniza tu carpeta actual con /app en el contenedor.
     # Esto permite que si cambias el código en tu PC, se actualice en Docker
     # sin tener que reconstruir la imagen (gracias al debug=True de Flask).

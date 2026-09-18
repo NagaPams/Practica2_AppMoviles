@@ -36,16 +36,19 @@ API REST minimalista para registro e inicio de sesión de usuarios. Usa **Flask-
 { "username": "alice", "password": "secreto123" }
 
 // Response 200
-{ "status": "success", "message": "Login exitoso", "user_id": 1, "username": "alice" }
+{ "status": "success", "message": "Login exitoso", "token": "<jwt>", "user_id": 1, "username": "alice" }
 
 // Response 401
 { "status": "error", "message": "Credenciales inválidas" }
 ```
 
+El `token` es un JWT firmado con `SECRET_KEY`, válido por 2 horas. Debe enviarse en el header `Authorization: Bearer <token>` para consumir los endpoints de `/books` (ver `LibreriaApp/`, que es la app real de esta práctica); sin un token válido, esos endpoints responden `401`.
+
 ### Levantar con Docker
 
 ```bash
 cd Docker-Flask/ORM
+cp .env.example .env   # y define SECRET_KEY con un valor aleatorio
 docker compose up --build
 ```
 

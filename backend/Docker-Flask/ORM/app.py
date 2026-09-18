@@ -1,7 +1,10 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
+from functools import wraps
 import os
+import datetime
+import jwt
 
 app = Flask(__name__)
 
@@ -9,6 +12,12 @@ app = Flask(__name__)
 # El archivo se guardará en la carpeta del contenedor como 'site.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Llave para firmar los tokens de sesión (JWT). Se toma de una variable de
+# entorno para no dejarla escrita en el código; en docker-compose.yml se
+# inyecta desde el archivo .env (ver .env.example).
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key-cambiame')
+TOKEN_EXP_HOURS = 2
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -41,6 +50,39 @@ class Book(db.Model):
             "stock": self.stock
         }
 # --- FIN CAMBIOS: Modelo para Libros ---
+
+# --- INICIO CAMBIOS: Sesiones seguras (JWT) ---
+def generar_token(user):
+    payload = {
+        "user_id": user.id,
+        "username": user.username,
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=TOKEN_EXP_HOURS)
+    }
+    return jwt.encode(payload, app.config['SECRET_KEY'], algorithm="HS256")
+
+
+def token_required(f):
+    # Decorador que exige un JWT válido en el header Authorization: Bearer <token>
+    # Protege las rutas de CRUD para que solo usuarios autenticados las usen.
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization', '')
+
+        if not auth_header.startswith('Bearer '):
+            return jsonify({"message": "Falta el token de autenticación"}), 401
+
+        token = auth_header.split(' ', 1)[1]
+
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        except jwt.ExpiredSignatureError:
+            return jsonify({"message": "El token ha expirado"}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({"message": "Token inválido"}), 401
+
+        return f(*args, **kwargs)
+    return decorated
+# --- FIN CAMBIOS: Sesiones seguras (JWT) ---
 
 # 3. Rutas
 
@@ -80,9 +122,11 @@ def login():
 
     # Verificamos si el usuario existe y si la contraseña coincide con el hash
     if user and bcrypt.check_password_hash(user.password, password):
+        token = generar_token(user)
         return jsonify({
             "status": "success",
             "message": "Login exitoso",
+            "token": token,
             "user_id": user.id,
             "username": user.username
         }), 200
@@ -94,6 +138,7 @@ def login():
 # 1. CREAR un libro (POST)
 # Implementé esta ruta para registrar nuevos libros en mi catálogo
 @app.route('/books', methods=['POST'])
+@token_required
 def create_book():
     data = request.get_json()
     new_book = Book(
@@ -109,6 +154,7 @@ def create_book():
 # 2. LEER todos los libros (GET)
 # Desarrollé este endpoint para consultar el catálogo completo
 @app.route('/books', methods=['GET'])
+@token_required
 def get_books():
     books = Book.query.all()
     return jsonify([book.to_dict() for book in books]), 200
@@ -116,6 +162,7 @@ def get_books():
 # 3. ACTUALIZAR un libro (PUT)
 # Añadí esta ruta para actualizar un libro (por ejemplo, reducir el stock cuando realizo una compra)
 @app.route('/books/<int:book_id>', methods=['PUT'])
+@token_required
 def update_book(book_id):
     book = Book.query.get(book_id)
     if not book:
@@ -133,6 +180,7 @@ def update_book(book_id):
 # 4. ELIMINAR un libro (DELETE)
 # Creé este endpoint para poder borrar un libro de la base de datos
 @app.route('/books/<int:book_id>', methods=['DELETE'])
+@token_required
 def delete_book(book_id):
     book = Book.query.get(book_id)
     if not book:

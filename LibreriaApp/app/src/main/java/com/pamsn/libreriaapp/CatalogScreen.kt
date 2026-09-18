@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.pamsn.libreriaapp.network.Book
 import com.pamsn.libreriaapp.network.RetrofitClient
+import com.pamsn.libreriaapp.network.SessionManager
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,12 +26,26 @@ fun CatalogScreen(onLogout: () -> Unit) {
     var showDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
 
+    // Si el token venció o es inválido, el backend responde 401:
+    // cerramos la sesión localmente y regresamos al login.
+    fun handleSessionExpired() {
+        SessionManager.clear()
+        onLogout()
+    }
+
+    fun logout() {
+        SessionManager.clear()
+        onLogout()
+    }
+
     // Cargar libros al iniciar la pantalla
     LaunchedEffect(Unit) {
         try {
             val response = RetrofitClient.apiService.getBooks()
             if (response.isSuccessful) {
                 books = response.body() ?: emptyList()
+            } else if (response.code() == 401) {
+                handleSessionExpired()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -44,7 +59,7 @@ fun CatalogScreen(onLogout: () -> Unit) {
             TopAppBar(
                 title = { Text("Catálogo de Libros") },
                 actions = {
-                    TextButton(onClick = onLogout) {
+                    TextButton(onClick = { logout() }) {
                         Text("Salir", color = MaterialTheme.colorScheme.error)
                     }
                 }
@@ -74,6 +89,8 @@ fun CatalogScreen(onLogout: () -> Unit) {
                                         val res = RetrofitClient.apiService.updateBook(book.id, updatedBook)
                                         if (res.isSuccessful) {
                                             books = books.map { if (it.id == book.id) updatedBook else it }
+                                        } else if (res.code() == 401) {
+                                            handleSessionExpired()
                                         }
                                     }
                                 }
@@ -84,6 +101,8 @@ fun CatalogScreen(onLogout: () -> Unit) {
                                     val res = RetrofitClient.apiService.deleteBook(book.id)
                                     if (res.isSuccessful) {
                                         books = books.filter { it.id != book.id }
+                                    } else if (res.code() == 401) {
+                                        handleSessionExpired()
                                     }
                                 }
                             }
@@ -106,6 +125,8 @@ fun CatalogScreen(onLogout: () -> Unit) {
                             response.body()?.book?.let { created ->
                                 books = books + created
                             }
+                        } else if (response.code() == 401) {
+                            handleSessionExpired()
                         }
                         showDialog = false
                     }

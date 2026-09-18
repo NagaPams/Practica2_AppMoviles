@@ -9,7 +9,7 @@ data class Book(
 )
 
 data class LoginRequest(val username: String, val password: String)
-data class LoginResponse(val status: String?, val message: String, val user_id: Int?, val username: String?)
+data class LoginResponse(val status: String?, val message: String, val token: String?, val user_id: Int?, val username: String?)
 
 data class RegisterRequest(val username: String, val password: String)
 data class RegisterResponse(val message: String)
